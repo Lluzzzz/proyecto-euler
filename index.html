@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Simulador didáctico del lanzamiento vertical de un cohete: método de Euler, solución analítica y análisis de error.">
+  <title>Misión NASA 1962 | Control de trayectoria</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <header class="masthead">
+    <div class="eyebrow"><span class="pulse"></span> MÉTODOS NUMÉRICOS / SALA DE CONTROL</div>
+    <h1>PROYECTO <em>FRIENDSHIP</em><span class="year">1962</span></h1>
+    <p class="lead">Desafío académico inspirado en <i>Talentos ocultos</i>. Simula un <strong>cohete hipotético</strong> de ascenso vertical durante los primeros 20 segundos: Euler explícito frente a una solución exacta.</p>
+    <div class="header-chips"><span>ECUACIONES DIFERENCIALES</span><span>EULER EXPLÍCITO</span><span>VERIFICACIÓN ANALÍTICA</span><span>100 % LOCAL</span></div>
+  </header>
+  <main class="layout">
+    <aside class="control-panel" aria-label="Parámetros de la simulación">
+      <section class="panel dark-panel">
+        <div class="section-num">01 / CONFIGURACIÓN DE MISIÓN</div>
+        <h2>Parámetros del cohete</h2>
+        <p class="muted">Cambia los valores para recalcular automáticamente las tablas y las gráficas.</p>
+        <form id="params-form" novalidate>
+          <div class="field-grid">
+            <label for="mass">Masa <small>m · kg</small><input id="mass" name="mass" type="number" value="1000" step="any" min="0.001" required></label>
+            <label for="thrust">Empuje <small>T · N</small><input id="thrust" name="thrust" type="number" value="15000" step="any" min="0.001" required></label>
+            <label for="gravity">Gravedad <small>g · m/s²</small><input id="gravity" name="gravity" type="number" value="9.81" step="any" min="0" required></label>
+            <label for="drag">Resistencia <small>k · kg/s</small><input id="drag" name="drag" type="number" value="100" step="any" min="0.001" required></label>
+            <label for="v0">Velocidad inicial <small>v₀ · m/s</small><input id="v0" name="v0" type="number" value="0" step="any" min="0" required></label>
+            <label for="y0">Altura inicial <small>y₀ · m</small><input id="y0" name="y0" type="number" value="0" step="any" min="0" required></label>
+            <label for="time">Tiempo final <small>t · s</small><input id="time" name="time" type="number" value="20" step="any" min="0.001" required></label>
+            <label for="step">Paso de Euler <small>h · s</small><input id="step" name="step" type="number" value="2" step="any" min="0.001" required></label>
+          </div>
+          <div id="validation" class="validation" role="alert" aria-live="polite" hidden></div>
+          <div class="buttons"><button id="calculate" type="submit" class="primary">▶ Calcular</button><button id="reset" type="button" class="secondary">↺ Restablecer</button></div>
+          <button id="compare" class="outline" type="button">≋ Comparar pasos (2, 1, 0,5 s)</button>
+        </form>
+      </section>
+      <section class="panel equations">
+        <div class="section-num">02 / MODELO</div>
+        <h2>Ecuaciones de vuelo</h2>
+        <div class="math">m · dv/dt = T − mg − kv</div>
+        <div class="math">dv/dt = T/m − g − (k/m)v</div>
+        <div class="math">dy/dt = v</div>
+        <p><strong>Euler:</strong> vₙ₊₁ = vₙ + Δt · f(vₙ)<br>yₙ₊₁ = yₙ + Δt · vₙ</p>
+        <p id="equation-specific" class="detail-line">Con los valores base: dv/dt = 5,19 − 0,1v</p>
+        <p class="micro">Se actualizan simultáneamente velocidad y altura usando los valores anteriores. La masa, el empuje y la resistencia son constantes: no representa una trayectoria orbital real.</p>
+      </section>
+    </aside>
+    <div class="results-col">
+      <section class="panel" aria-label="Resultados principales">
+        <div class="between"><div><div class="section-num">03 / TELEMETRÍA</div><h2>Resultado al tiempo final</h2></div><span id="status" class="status">SIMULACIÓN LISTA</span></div>
+        <div class="metrics">
+          <article class="metric"><span>VELOCIDAD EULER</span><strong id="metric-v">—</strong><small>m/s</small></article>
+          <article class="metric"><span>ALTURA EULER</span><strong id="metric-y">—</strong><small>m</small></article>
+          <article class="metric"><span>ERROR | VELOCIDAD</span><strong id="metric-ev">—</strong><small>m/s</small></article>
+          <article class="metric"><span>ERROR | ALTURA</span><strong id="metric-ey">—</strong><small>m</small></article>
+        </div>
+        <p id="metric-caption" class="caption-line">Se mostrarán los resultados calculados.</p>
+      </section>
+      <section class="panel plot-panel"><div class="section-num">04 / ANÁLISIS VISUAL</div><div class="between"><h2>Velocidad frente al tiempo</h2><span class="unit">m/s</span></div><div class="legend"><span><i class="line swatch-euler"></i> Método de Euler</span><span><i class="line swatch-exact"></i> Solución analítica</span></div><div id="velocity-plot" class="chart" role="img" aria-label="Gráfica de velocidad contra tiempo"></div></section>
+      <section class="panel plot-panel"><div class="between"><h2>Altura frente al tiempo</h2><span class="unit">m</span></div><div class="legend"><span><i class="line swatch-euler"></i> Método de Euler</span><span><i class="line swatch-exact"></i> Solución analítica</span></div><div id="height-plot" class="chart" role="img" aria-label="Gráfica de altura contra tiempo"></div></section>
+      <section class="panel compare-panel" id="compare-section"><div class="section-num">05 / CONVERGENCIA</div><div class="between"><h2>Comparación de tamaños de paso</h2><span id="compare-tag" class="unit">20 s / datos base</span></div><div class="table-scroll"><table id="comparison-table"><thead><tr><th>h (s)</th><th>Pasos</th><th>v Euler (m/s)</th><th>y Euler (m)</th><th>Error v (m/s)</th><th>Error y (m)</th></tr></thead><tbody></tbody></table></div><p id="comparison-message" class="insight">Presiona «Comparar pasos» para evaluar la convergencia del método.</p></section>
+      <section class="panel table-panel"><div class="section-num">06 / REGISTRO DE CÁLCULOS</div><div class="between"><h2>Tabla completa de iteraciones</h2><button type="button" class="export" id="csv-button">↓ Exportar CSV</button></div><div class="table-scroll"><table id="iteration-table"><thead><tr><th>n</th><th>t (s)</th><th>v Euler (m/s)</th><th>y Euler (m)</th><th>v exacta (m/s)</th><th>y exacta (m)</th><th>|Error v| (m/s)</th><th>|Error y| (m)</th></tr></thead><tbody></tbody></table></div></section>
+      <section class="note"><strong>Contexto histórico ≠ parámetros reales.</strong> En 1962, Katherine Johnson verificó cálculos orbitales para la misión Friendship 7 de John Glenn. Este simulador es una aproximación didáctica con valores inventados. Fuente: <a target="_blank" rel="noreferrer" href="https://ciencia.nasa.gov/gente-de-la-nasa/el-legado-de-katherine-g-johnson-0/">NASA — El legado de Katherine G. Johnson</a>.</section>
+    </div>
+  </main>
+  <footer>MISIÓN NASA 1962 · DESAFÍO ACADÉMICO DE MÉTODOS NUMÉRICOS · HTML / CSS / JAVASCRIPT · SIN DEPENDENCIAS</footer>
+</body>
+</html>
